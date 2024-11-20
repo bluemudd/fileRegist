@@ -1,0 +1,1 @@
+/usr/bin/cc    CMakeFiles/server.dir/file_upload.c.o CMakeFiles/server.dir/mk_list.c.o CMakeFiles/server.dir/del_file.c.o CMakeFiles/server.dir/mk_dir.c.o CMakeFiles/server.dir/server.c.o  -o server 

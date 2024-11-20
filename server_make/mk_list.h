@@ -1,6 +1,5 @@
-#ifndef FILE_UPLOAD_H
-#define FILE_UPLOAD_H
-
+#ifndef FILE_LIST_H
+#define FILE_LIST_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +9,6 @@
 
 #define BUFFER_SIZE 1024
 
-
-void handle_upload(int client_socket, const char *full_path);
-
+void handle_list(int client_socket, const char* full_path);
 
 #endif

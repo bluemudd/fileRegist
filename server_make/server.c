@@ -4,31 +4,77 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include "file_upload.h"
+#include <sys/stat.h>
+#include <dirent.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
+#define UPLOAD_DIR "uploads"  // 작업할 기본 디렉토리
 
+// 클라이언트의 명령어 처리
 void handle_client(int client_socket) {
     char buffer[BUFFER_SIZE] = {0};
-    
-    // 명령어 수신
-    read(client_socket, buffer, BUFFER_SIZE);
-    printf("Received command: %s\n", buffer);
+    char *command = NULL;
 
-    // 명령어에 따른 작업 수행
-    if (strcmp(buffer, "upload") == 0) {
-        handle_upload(client_socket);
-    } else if (strcmp(buffer, "mkdir") == 0) {
-        // 디렉토리 생성 구현
-    } else if (strcmp(buffer, "list") == 0) {
-        // 파일 목록 조회 구현
-    } else if (strcmp(buffer, "delete") == 0) {
-        // 파일 삭제 구현
+    // 디렉토리 준비
+    struct stat st = {0};
+    char full_path[BUFFER_SIZE];
+	
+	int bytes_read = recv(client_socket, buffer, BUFFER_SIZE, 0);
+	if(bytes_read <= 0){
+		perror("Client disconnected during directory path reception");
+		return;
+	}
+	
+	buffer[bytes_read] = "\0";
+	printf("Received directory name: %s\n", buffer);
+	
+	snprintf(full_path, sizeof(full_path), "%s/%s", UPLOAD_DIR, buffer);
+	
+	if(stat(full_path, &st) == -1){
+		if(mkdir(full_path, 0777) == 0){
+			printf("Directory created: %s\n", full_path);
+			send(client_socket, "Directory created successfully\n", 32, 0);
+		} else{
+			perror("Failed to create directory");
+			send(client_socket, "Error: Failed to create directory\n", 35, 0);
+		}
+	}
+	
+    send(client_socket, "READY\n", strlen("READY\n"), 0);
+
+    while (1) {
+        memset(buffer, 0, sizeof(buffer));
+        int bytes_read = read(client_socket, buffer, BUFFER_SIZE);
+        if (bytes_read <= 0) {
+            perror("Client disconnected");
+            break;
+        }
+
+        // 명령어와 인수 분리
+        buffer[bytes_read] = '\0';
+        printf("Received command: %s\n", buffer);
+        command = strtok(buffer, " ");
+        printf("%s\n", command);
+        printf("%s\n", full_path);
+
+        // 명령 처리
+        if (command != NULL) {
+            if (strcmp(command, "upload") == 0) {
+            handle_upload(client_socket, full_path); // 파일 업로드 처리
+            } else if (strcmp(command, "list") == 0) {
+                handle_list(client_socket, full_path);
+            } else if (strcmp(command, "delete") == 0) {
+                handle_delete(client_socket, full_path);
+            } else if (strcmp(command, "exit") == 0) {
+                send(client_socket, "Goodbye\n", strlen("Goodbye\n"), 0);
+                break;
+            } else {
+                send(client_socket, "Error: Unknown command\n", strlen("Error: Unknown command\n"), 0);
+            }
+        }
     }
 
-    // 클라이언트에 응답 전송
-    send(client_socket, "Done", strlen("Done"), 0);
     close(client_socket);
 }
 
@@ -47,12 +93,20 @@ int main() {
     address.sin_port = htons(PORT);
 
     // 바인딩 및 리스닝
-    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("bind failed");
+        exit(1);
+    }
     listen(server_fd, 3);
-
+    printf("Server listening on port %d...\n", PORT);
+    
     while ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) >= 0) {
+        printf("Client connected\n");
         handle_client(client_socket);
+        printf("Client disconnected\n");
     }
 
+    close(server_fd);
     return 0;
 }
+
