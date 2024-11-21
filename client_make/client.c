@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdint.h>
+#include <setjmp.h>
+#include <inttypes.h>
 #include "client.h"
 
 #define PORT 8080

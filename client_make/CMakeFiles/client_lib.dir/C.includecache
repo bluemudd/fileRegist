@@ -30,25 +30,3 @@ client.h
 
 /home/guru/project/fileRegist/client_make/client.h
 
-/home/guru/project/fileRegist/client_make/upload.c
-stdio.h
--
-stdlib.h
--
-string.h
--
-sys/socket.h
--
-stdint.h
--
-inttypes.h
--
-setjmp.h
--
-arpa/inet.h
--
-unistd.h
--
-client.h
-/home/guru/project/fileRegist/client_make/client.h
-

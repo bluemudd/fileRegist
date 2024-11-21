@@ -1,0 +1,1 @@
+/usr/bin/cc  -std=c99   CMakeFiles/test_runner.dir/test/test_upload_file.c.o  -o test_runner  -Wl,-rpath,/usr/local/lib /usr/local/lib/libcmocka.so.1.0.0 libclient_lib.a 

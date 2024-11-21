@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <setjmp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "client.h"
